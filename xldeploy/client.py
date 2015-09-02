@@ -145,6 +145,7 @@ class XLDConnection(object):
         :param request: urllib2 request object
         :return: response body as string
         """
+
         try:
             logger.info('executing request: %s' % (request.get_full_url()))
             response = urllib2.urlopen(request).read()

@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 class Ci(object):
     def __init__(self, **kwargs):
         if kwargs.has_key('xml'):
+
             self.__xml = kwargs['xml']
             self.__type = self.xml_root().tag
 

@@ -16,44 +16,6 @@ Version = __version__  # for backwards compatibility
 
 # get config files .. home dir takes presedence over /etc
 XlDeployConfigLocations = ['/etc/.xld_config.ini','~/.xld_config.ini']
-XlDLoggingConfig = {
-    'version': 1,
-    'disable_existing_loggers': False,  # this fixes the problem
-
-    'formatters': {
-        'standard': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-        },
-    },
-    'handlers': {
-        "info_file_handler": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "level": "INFO",
-            "formatter": "simple",
-            "filename": "info.log",
-            "maxBytes": 10485760,
-            "backupCount": 20,
-            "encoding": "utf8"
-        },
-
-        "error_file_handler": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "level": "ERROR",
-            "formatter": "simple",
-            "filename": "errors.log",
-            "maxBytes": 10485760,
-            "backupCount": 20,
-            "encoding": "utf8"
-        }
-    },
-    'loggers': {
-        '': {
-            'handlers': ['default'],
-            'level': 'INFO',
-            'propagate': True
-        }
-    }
-}
 
 # initialize the config parser
 config = ConfigParser.SafeConfigParser()
@@ -112,6 +74,15 @@ def connect_repository(url = None, username = None, password = None, **kwargs):
     from xldeploy.repository.connection import RepoConnection
     return RepoConnection(url, username, password)
 
+def connect_deployment(url = None, username = None, password = None, **kwargs):
+    """
+    :param url: String: url where the xldeploy instance can be reached
+    :param username: String: username to use when contacting xldeploy
+    :param password: String: password to use when contaction the xldeploy instance
+    :return: xldeploy.client object
+    """
+    from xldeploy.deployment.connection import DeploymentConnection
+    return DeploymentConnection(url, username, password)
 
 
 # TODO make logging configurable from the config file

@@ -124,7 +124,7 @@ class RepoConnection(XLDConnection):
             self.http_post("repository/cis", cis_xml)
             logger.info('creation succesfull')
             return True
-        except:
+        except Exception:
             logger.info('unable to create set of cis')
             return False
 
