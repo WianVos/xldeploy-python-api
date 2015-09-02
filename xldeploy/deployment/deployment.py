@@ -77,8 +77,8 @@ class DeploymentSpec():
 
         self.__ds_dict = output_dict
 
-    @timer(logger)
-    @log_with(logger)
+    # @timer(logger)
+    # @log_with(logger)
     def parse_subelement_to_dict(self, element):
         output = {}
 
@@ -94,7 +94,6 @@ class DeploymentSpec():
                 if isinstance(output[child.tag], dict):
                     org_value = output[child.tag]
                     new_value = self.parse_subelement_to_dict(child)
-                    print new_value
                     output[child.tag] = [org_value, new_value]
                 elif isinstance(output[child.tag], list):
                     new_value = self.parse_subelement_to_dict(child)
@@ -106,15 +105,15 @@ class DeploymentSpec():
 
         return output
 
-    @timer(logger)
-    @log_with(logger)
+    # @timer(logger)
+    # @log_with(logger)
     def to_xml(self):
 
         return ET.tostring(self.dict_to_xml(self.deployment_spec_dict))
 
 
-    @timer(logger)
-    @log_with(logger)
+    # @timer(logger)
+    # @log_with(logger)
     def dict_to_xml(self, xml_dict):
         for k,v in xml_dict.items():
 
@@ -151,6 +150,48 @@ class DeploymentSpec():
 
         return element
 
+
+    def get_validation_messages(self):
+        """
+        extract the validation messages from the deployment spec dictionary
+        :return:
+        """
+        messages = {}
+        for t, v in self.__ds_dict['deployment']['deployeds'].items():
+            if isinstance(v, list):
+                for item in v :
+                    for x in list(self.gen_dict_extract('validation-message', item)):
+                        messages.setdefault(t,[]).append(x)
+            else:
+                messages.setdefault(t,[]).append(dict(self.gen_dict_extract('validation-message', v)))
+
+        return messages
+
+
+
+
+    def gen_dict_extract(self, key, var):
+        """
+        does a really fast recursive search over a large dictionary for a certain key
+        :param key: key to search for
+        :param var: dict to search
+        :return: generator object
+        """
+        if hasattr(var,'iteritems'):
+            for k, v in var.iteritems():
+                if k == key:
+                    yield v
+                if isinstance(v, dict):
+                    for result in self.gen_dict_extract(key, v):
+                        yield result
+                elif isinstance(v, list):
+                    for d in v:
+                        for result in self.gen_dict_extract(key, d):
+                            yield result
+
+    def update_xml(self, xml):
+        self.__ds_xml = xml
+        self.parse_ds_xml()
 
     # service methods
     def to_dict(self):
@@ -197,10 +238,11 @@ class DeploymentSpec():
     def deployment_spec_xml(self):
         return self.__ds_xml
 
-    @deployment_spec_xml.setter
-    def deployment_spec_xml(self, ddeployment_spec_xml):
-           self.__ds_xml = ddeployment_spec_xml
-           self.parse_ds_xml()
+    # TODO: might be removable
+    # @deployment_spec_xml.setter
+    # def deployment_spec_xml(self, ddeployment_spec_xml):
+    #     self.__ds_xml = ddeployment_spec_xml
+    #     self.parse_ds_xml()
 
 
     @property
@@ -214,6 +256,7 @@ class DeploymentSpec():
     @deployment_spec_dict.setter
     def deployment_spec_dict(self, ddeployment_spec_dict):
            self.__ds_dict = ddeployment_spec_dict
+
 
    
 

@@ -70,10 +70,53 @@ class DeploymentConnection(XLDConnection):
     @log_with(logger)
     def get_deployment_mapping(self, deployment_spec):
         try:
-            output = self.http_post("/deployment/prepare/deployeds", deployment_spec.to_xml())
-            deployment_spec.deployment_spec_xml = output
+            output = self.http_post("deployment/prepare/deployeds", deployment_spec.to_xml())
+            deployment_spec.update_xml(output)
         except Exception:
             raise xldeploy.exceptions.XldeployDeploymentSpecError("unable to obtain deployment specification")
+            return None
+
+        return deployment_spec
+
+    @timer(logging)
+    @log_with(logger)
+    def validate_deployment_spec(self, deployment_spec):
+        """
+        validate if a deployment spec can be validated
+        :param deployment_spec:
+        :return:
+        """
+        try:
+            output = self.http_post("deployment/validate", deployment_spec.to_xml())
+            return True
+        except Exception:
+            raise xldeploy.exceptions.XldeployUnableToValidate("unable to validate deployment")
             return False
 
-        return True
+    @timer(logging)
+    @log_with(logger)
+    def create_deployment_task(self, deployment_spec):
+        """
+        create a deployment task if the deployment_spec can be validated
+        :param deployment_spec:
+        :return:
+        """
+        if self.validate_deployment_spec(deployment_spec):
+            logger.info("deploymentspec validated, moving on to task creation")
+            try:
+                output = self.http_post("deployment", deployment_spec.to_xml())
+                return output
+            except Exception:
+                raise xldeploy.exceptions.XldeployUnableToValidate("unable to validate deployment")
+                return None
+        else:
+            logger.error("unable to validate deployment, task not created")
+            return None
+
+
+#TODO: make generation more specific
+#TODO: add posibility of generating single deployments
+#TODO: add update deployments
+
+
+

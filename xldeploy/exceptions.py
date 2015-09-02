@@ -34,7 +34,7 @@ class XlDeployDeploymentTypeError(XldeployError):
     pass
 
 
-class XlDeployDeploymentSpecError(XldeployError):
+class XldeployDeploymentSpecError(XldeployError):
     """
     This error is thrown whe python is unable to retrieve a deployment specifiaction for a certain environment application combination
     """
@@ -44,8 +44,16 @@ class XldeployDeploymentPlanPreview(XldeployError):
     """
     This error is thrown when the api is unable to retrieve a valid deployment plan preview
     """
+    pass
 
 class XldeployDeploymentPlanIllegalInvocation(XldeployError):
     """
     This error is thrown when the deployment plan class is invoked without xml input
     """
+    pass
+
+class XldeployUnableToValidate(XldeployError):
+    """
+    this error is thrown when validation of a deployment plan fails
+    """
+    pass

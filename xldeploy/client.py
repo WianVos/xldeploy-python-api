@@ -146,10 +146,10 @@ class XLDConnection(object):
         :return: response body as string
         """
 
-        try:
-            logger.info('executing request: %s' % (request.get_full_url()))
-            response = urllib2.urlopen(request).read()
-        except urllib2.HTTPError as e:
-            logger.info('error Http request %s returned %s: %s' % (request.get_full_url(), e.code, e.message))
+        #try:
+        logger.info('executing request: %s' % (request.get_full_url()))
+        response = urllib2.urlopen(request).read()
+        #except urllib2.HTTPError as e:
+        #    logger.info('error Http request %s returned %s: %s' % (request.get_full_url(), e.code, e.message))
         return response
 
