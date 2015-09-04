@@ -86,13 +86,15 @@ class XLDConnection(object):
         return self.http_get(path)
 
     @log_with(logger)
-    def http_post(self, path, post_data):
+    def http_post(self, path, post_data = None):
         """
         do a http post request to the xld server
         :param post_data:
         :return:
         """
+
         request = self.prepare_request(path, post_data)
+        request.get_method = lambda: 'POST'
         return self.execute_request(request)
 
     @log_with(logger)

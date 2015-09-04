@@ -15,14 +15,7 @@ from xldeploy.repository import VALID_QUERY_PARAMETERS, META_DATA_DICT
 from xldeploy.repository.configuration_item import Ci, CiSet
 
 
-HAVE_HTTPS_CONNECTION = False
-try:
-    import ssl
 
-    if hasattr(ssl, 'SSLError'):
-        HAVE_HTTPS_CONNECTION = True
-except ImportError:
-    pass
 
 logger = logging.getLogger(__name__)
 

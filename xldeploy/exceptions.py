@@ -57,3 +57,10 @@ class XldeployUnableToValidate(XldeployError):
     this error is thrown when validation of a deployment plan fails
     """
     pass
+
+#TaskService
+class XldeployTaskService(XldeployError):
+    """
+    this error is throw when the task service is unable to complete a request
+    """
+    pass

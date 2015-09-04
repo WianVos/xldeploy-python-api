@@ -66,6 +66,7 @@ logging.config.dictConfig(XlDLoggingConfig)
 
 def connect_repository(url = None, username = None, password = None, **kwargs):
     """
+    connect to the repository service of xld
     :param url: String: url where the xldeploy instance can be reached
     :param username: String: username to use when contacting xldeploy
     :param password: String: password to use when contaction the xldeploy instance
@@ -76,6 +77,7 @@ def connect_repository(url = None, username = None, password = None, **kwargs):
 
 def connect_deployment(url = None, username = None, password = None, **kwargs):
     """
+    connect to the deployment service of xld
     :param url: String: url where the xldeploy instance can be reached
     :param username: String: username to use when contacting xldeploy
     :param password: String: password to use when contaction the xldeploy instance
@@ -84,6 +86,17 @@ def connect_deployment(url = None, username = None, password = None, **kwargs):
     from xldeploy.deployment.connection import DeploymentConnection
     return DeploymentConnection(url, username, password)
 
+
+def connect_task(url = None, username = None, password = None, **kwargs):
+    """
+    connect to the task service of xld
+    :param url: String: url where the xldeploy instance can be reached
+    :param username: String: username to use when contacting xldeploy
+    :param password: String: password to use when contaction the xldeploy instance
+    :return: xldeploy.client object
+    """
+    from xldeploy.task.connection import TaskConnection
+    return TaskConnection(url, username, password)
 
 # TODO make logging configurable from the config file
 
