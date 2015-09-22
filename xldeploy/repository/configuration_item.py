@@ -14,8 +14,6 @@ class Ci(object):
             self.__xml = kwargs['xml']
             self.__type = self.xml_root().tag
             try:
-                print self.__type
-                print META_DATA_DICT[self.__type]
                 self.__metadata = META_DATA_DICT[self.__type]
                 logger.info('Imported metadata for ci: %s' % self.__type)
             except:
@@ -53,8 +51,6 @@ class Ci(object):
                 # trying to work around the metadata lookup
                 # u can pass in metadata wich wil circumvent the lookup through the repository connection
             try:
-                print self.__type
-                print META_DATA_DICT[self.__type]
                 self.__metadata = META_DATA_DICT[self.__type]
                 logger.info('Imported metadata for ci: %s' % self.__type)
             except:
@@ -215,19 +211,15 @@ class Ci(object):
 
     @log_with(logger)
     def update_ci_properties(self, **kwargs):
-        print self.__properties
         for k, v in kwargs.items():
             if self.property_valid(k) is False:
                 logger.info("property %s is invalid for %s" % (k,self.__type ))
 
         self.__properties.update(kwargs)
-        print self.__properties
         self.xml_update()
 
     @log_with(logger)
     def valid_properties(self):
-        print 'blah'
-        print self.__metadata
         return self.__metadata['properties'].keys()
 
 
@@ -298,7 +290,6 @@ class CiSet(object):
         :return: list containing cis
         """
         cis = []
-        print xml
         cis_xml = ET.fromstring(xml)
         for ci_xml in  cis_xml.findall('ci'):
             ci = Ci(xml = ci_xml)
