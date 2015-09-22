@@ -5,25 +5,13 @@
 #
 import logging
 from os import path
-import urllib2, urllib, base64
 from xml.etree import ElementTree as ET
 
 import xldeploy
 import xldeploy.exceptions
-
 from xldeploy.decorators import log_with, timer
 from xldeploy.client     import XLDConnection
 from xldeploy.deployment.deployment import DeploymentSpec, DeploymentPlan
-
-
-HAVE_HTTPS_CONNECTION = False
-try:
-    import ssl
-
-    if hasattr(ssl, 'SSLError'):
-        HAVE_HTTPS_CONNECTION = True
-except ImportError:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +27,23 @@ class DeploymentConnection(XLDConnection):
 
         super(DeploymentConnection, self).__init__(url, username, password, **kwargs)
 
+    @timer(logging)
+    @log_with(logger)
+    def get_deployment_spec(self, environment_id, package_id):
+        logger.info("retieving deployment specification for %s onto %s" % (package_id, environment_id))
+
+        # does the deployment exist?
+        application_id = path.dirname(package_id)
+        response = self.http_get_query("deployment/exists",
+                                       {'environment': environment_id, 'application': application_id})
+        root = ET.fromstring(response)
+        answer = root.text()
+
+        if answer == 'false':
+            self.get_initial_deployment_spec(environment_id, package_id)
+        if answer == 'true':
+            # todo figure out what i intended here
+            self.get_update()
 
     @timer(logging)
     @log_with(logger)
@@ -74,7 +79,6 @@ class DeploymentConnection(XLDConnection):
             deployment_spec.update_xml(output)
         except Exception:
             raise xldeploy.exceptions.XldeployDeploymentSpecError("unable to obtain deployment specification")
-            return None
 
         return deployment_spec
 
@@ -91,7 +95,6 @@ class DeploymentConnection(XLDConnection):
             return True
         except Exception:
             raise xldeploy.exceptions.XldeployUnableToValidate("unable to validate deployment")
-            return False
 
     @timer(logging)
     @log_with(logger)
@@ -108,10 +111,10 @@ class DeploymentConnection(XLDConnection):
                 return output
             except Exception:
                 raise xldeploy.exceptions.XldeployUnableToValidate("unable to validate deployment")
-                return None
         else:
             logger.error("unable to validate deployment, task not created")
             return None
+
 
 
 #TODO: make generation more specific

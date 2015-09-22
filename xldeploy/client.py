@@ -4,19 +4,13 @@
 # FOR A PARTICULAR PURPOSE. THIS CODE AND INFORMATION ARE NOT SUPPORTED BY XEBIALABS.
 #
 import logging
-import urllib2, urllib, base64
+import urllib2
+import urllib
+import base64
+import sys
+
 import xldeploy
 from xldeploy.decorators import log_with, timer
-
-
-HAVE_HTTPS_CONNECTION = False
-try:
-    import ssl
-
-    if hasattr(ssl, 'SSLError'):
-        HAVE_HTTPS_CONNECTION = True
-except ImportError:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -82,18 +76,31 @@ class XLDConnection(object):
     @log_with(logger)
     def http_get_query(self, path, query_data):
         path = "%s?%s" % (path, urllib.urlencode(query_data))
-        print path
         return self.http_get(path)
 
     @log_with(logger)
     def http_post(self, path, post_data = None):
         """
         do a http post request to the xld server
-        :param post_data:
+        :param:
+        :post_data:
         :return:
         """
-
         request = self.prepare_request(path, post_data)
+        request.get_method = lambda: 'POST'
+        return self.execute_request(request)
+
+    @log_with(logger)
+    def http_post_query(self, path, query_data, data=None):
+        """
+        post request with query
+        :param path:
+        :param query_data:
+        :param data:
+        :return:
+        """
+        path = "%s?%s" % (path, urllib.urlencode(query_data))
+        request = self.prepare_request(path, data)
         request.get_method = lambda: 'POST'
         return self.execute_request(request)
 
@@ -115,7 +122,7 @@ class XLDConnection(object):
         :param path:
         :return:
         """
-        request = prepare_request(path, put_data)
+        request = self.prepare_request(path)
         request.get_method = lambda: 'DELETE'
         return self.execute_request(request)
 

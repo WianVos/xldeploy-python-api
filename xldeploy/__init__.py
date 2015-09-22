@@ -6,8 +6,6 @@
 import ConfigParser
 import logging
 import logging.config
-import sys
-import re
 import os
 
 
@@ -98,6 +96,17 @@ def connect_task(url = None, username = None, password = None, **kwargs):
     from xldeploy.task.connection import TaskConnection
     return TaskConnection(url, username, password)
 
+
+def connect_inspection(url=None, username=None, password=None, **kwargs):
+    """
+    connect to the deployment service of xld
+    :param url: String: url where the xldeploy instance can be reached
+    :param username: String: username to use when contacting xldeploy
+    :param password: String: password to use when contaction the xldeploy instance
+    :return: xldeploy.client object
+    """
+    from xldeploy.inspection.connection import InspectionConnection
+    return InspectionConnection(url, username, password)
 # TODO make logging configurable from the config file
 
 

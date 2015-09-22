@@ -64,3 +64,10 @@ class XldeployTaskService(XldeployError):
     this error is throw when the task service is unable to complete a request
     """
     pass
+
+
+class XldeployInspectionService(XldeployError):
+    """
+    this error is throw when the inspection service is unable to complete a request
+    """
+    pass

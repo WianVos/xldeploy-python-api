@@ -1,8 +1,6 @@
-
 from xml.etree import ElementTree as ET
-
 import logging
-import xldeploy
+
 from xldeploy.repository import META_DATA_DICT
 from xldeploy.decorators import log_with, timer
 
@@ -15,12 +13,6 @@ class Ci(object):
             self.__xml = kwargs['xml']
             self.__type = self.xml_root().tag
 
-            try:
-                self.__metadata = META_DATA_DICT[self.__type]
-                logger.info('Imported metadata for ci: %s' % self.__type)
-            except KeyError:
-                logger.error('Could not find Metadata for type: %s' % self.__type)
-                raise Exception('Metadata not Found')
 
             self.__properties = self.properties_to_dict(self.xml_root())
             self.__attributes = self.attributes_to_dict(self.xml_root())
@@ -31,14 +23,6 @@ class Ci(object):
                 self.__type = kwargs['type']
             except KeyError:
                 self._type = None
-
-            try:
-                self.__metadata = META_DATA_DICT[self.__type]
-                logger.debug('Imported metadata for ci: %s' % self.__type)
-            except KeyError:
-                logger.error('Could not find Metadata for type: %s' % self.__type)
-                raise Exception('Metadata not Found')
-
 
             try:
                 self.__properties = kwargs['properties']
@@ -52,6 +36,18 @@ class Ci(object):
                 self.__id = kwargs['id']
             except KeyError:
                 self.__id = None
+
+                # trying to work around the metadata lookup
+            # u can pass in metadata wich wil circumvent the lookup through the repository connection
+            if kwargs.has_key('meta_data'):
+                self.__metadata = kwargs['meta_data'][self.__type]
+            else:
+                try:
+                    self.__metadata = META_DATA_DICT[self.__type]
+                    logger.info('Imported metadata for ci: %s' % self.__type)
+                except KeyError:
+                    logger.error('Could not find Metadata for type: %s' % self.__type)
+                    raise Exception('Metadata not Found')
 
 
 
@@ -248,8 +244,9 @@ class CiSet(object):
     """
     Object to hold a set of cis for further use . can be saved to xld at once ..
     """
+    # warning: this changed
 
-    def __init__(self, cis = [], xml = None):
+    def __init__(self, cis, xml=None):
         self.__cis = cis
         if xml is not None:
             self.__cis = self.parse_xml_list_to_cis(xml)
