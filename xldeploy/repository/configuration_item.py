@@ -246,8 +246,9 @@ class CiSet(object):
     """
     # warning: this changed
 
-    def __init__(self, cis, xml=None):
-        self.__cis = cis
+    def __init__(self, cis=None, xml=None):
+        if cis is None:
+            self.__cis = []
         if xml is not None:
             self.__cis = self.parse_xml_list_to_cis(xml)
 

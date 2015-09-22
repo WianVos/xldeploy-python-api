@@ -4,4 +4,6 @@
 *.idea
 .idea
 *.log
-
+build
+dist
+xldeploy_python_api.egg-info

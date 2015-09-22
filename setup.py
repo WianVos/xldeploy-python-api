@@ -9,7 +9,6 @@ import sys
 
 from setuptools import setup, find_packages
 
-
 ROOT = os.path.dirname(__file__)
 VERSION_RE = re.compile(r'''__version__ = ['"]([0-9.]+)['"]''')
 
@@ -33,14 +32,11 @@ setup(
     version=get_version(),
     description='Xebialabs xldeploy python api',
     author='Wian Vos',
+    author_email='wvos@xebia.com',
     url='https://github.com/wvos/xldeploy-python-api',
     scripts=[],
     packages=find_packages(exclude=['tests*']),
-    package_data={
-        'boto3': [
-            'data/aws/resources/*.json',
-        ]
-    },
+    package_data={},
     include_package_data=True,
     install_requires=requires,
     extras_require={
