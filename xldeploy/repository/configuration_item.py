@@ -8,15 +8,28 @@ logger = logging.getLogger(__name__)
 
 class Ci(object):
     def __init__(self, **kwargs):
+
         if kwargs.has_key('xml'):
 
             self.__xml = kwargs['xml']
             self.__type = self.xml_root().tag
-
+            try:
+                print self.__type
+                print META_DATA_DICT[self.__type]
+                self.__metadata = META_DATA_DICT[self.__type]
+                logger.info('Imported metadata for ci: %s' % self.__type)
+            except:
+                if kwargs.has_key('meta_data'):
+                    self.__metadata = kwargs['meta_data'][self.__type]
+                else:
+                    logger.error('Could not find Metadata for type: %s' % self.__type)
+                    raise Exception('Metadata not Found')
 
             self.__properties = self.properties_to_dict(self.xml_root())
             self.__attributes = self.attributes_to_dict(self.xml_root())
             self.__id = self.__attributes['id']
+
+
         else:
             self.__xml = None
             try:
@@ -38,19 +51,18 @@ class Ci(object):
                 self.__id = None
 
                 # trying to work around the metadata lookup
-            # u can pass in metadata wich wil circumvent the lookup through the repository connection
-            if kwargs.has_key('meta_data'):
-                self.__metadata = kwargs['meta_data'][self.__type]
-            else:
-                try:
-                    self.__metadata = META_DATA_DICT[self.__type]
-                    logger.info('Imported metadata for ci: %s' % self.__type)
-                except KeyError:
+                # u can pass in metadata wich wil circumvent the lookup through the repository connection
+            try:
+                print self.__type
+                print META_DATA_DICT[self.__type]
+                self.__metadata = META_DATA_DICT[self.__type]
+                logger.info('Imported metadata for ci: %s' % self.__type)
+            except:
+                if kwargs.has_key('meta_data'):
+                    self.__metadata = kwargs['meta_data'][self.__type]
+                else:
                     logger.error('Could not find Metadata for type: %s' % self.__type)
                     raise Exception('Metadata not Found')
-
-
-
 
     def __str__(self):
         """
@@ -214,6 +226,8 @@ class Ci(object):
 
     @log_with(logger)
     def valid_properties(self):
+        print 'blah'
+        print self.__metadata
         return self.__metadata['properties'].keys()
 
 

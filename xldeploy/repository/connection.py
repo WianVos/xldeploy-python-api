@@ -5,17 +5,12 @@
 #
 import logging
 from os import path
-import urllib2, urllib, base64
 from xml.etree import ElementTree as ET
 
-import xldeploy
 from xldeploy.decorators import log_with, timer
 from xldeploy.client     import XLDConnection
 from xldeploy.repository import VALID_QUERY_PARAMETERS, META_DATA_DICT
 from xldeploy.repository.configuration_item import Ci, CiSet
-
-
-
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +139,7 @@ class RepoConnection(XLDConnection):
             root = ET.fromstring(self.http_get_query('repository/query', kwargs))
             logger.debug('retrieval succesfull')
         except Exception:
-            logger.error('unable to retrieve cis')
+            logger.error('to retrieve cis')
             return False
 
 
