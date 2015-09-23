@@ -88,6 +88,34 @@ class Ci(object):
 
         return result
 
+    @log_with(logger)
+    def validate_properties(self):
+        req_properties = self.get_mandatory_properties()
+        actual_properties = self.__properties.keys()
+        missing_properties = []
+
+        for rp in req_properties:
+            if rp not in actual_properties:
+                missing_properties.append(rp)
+
+        if missing_properties:
+            return missing_properties
+        else:
+            return True
+
+    @log_with(logger)
+    def get_mandatory_properties(self):
+        req_properties = []
+        for p, v in self.__metadata['properties'].items():
+            if v['required'] == 'true':
+                if 'hidden' in v.keys():
+                    if v['hidden'] is 'false':
+                        req_properties.append(p)
+                else:
+                    req_properties.append(p)
+
+        return req_properties
+
     @timer(logger)
     @log_with(logger)
     def properties_to_dict(self, tree):

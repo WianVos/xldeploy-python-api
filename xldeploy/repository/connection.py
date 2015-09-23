@@ -27,6 +27,7 @@ class RepoConnection(XLDConnection):
         self.prefetch_metadata()
 
 
+
     @log_with(logger)
     def get_ci_by_name(self, ci_name):
         """
@@ -42,7 +43,6 @@ class RepoConnection(XLDConnection):
         except:
             logger.debug('unable to retrieve ci: %s ' % ci_name)
             return None
-
 
     @log_with(logger)
     def create_ci(self, ci):
