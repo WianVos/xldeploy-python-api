@@ -107,6 +107,29 @@ def connect_inspection(url=None, username=None, password=None, **kwargs):
     """
     from xldeploy.inspection.connection import InspectionConnection
     return InspectionConnection(url, username, password)
+
+
+def connect_role(url=None, username=None, password=None, **kwargs):
+    """
+    connect to the deployment service of xld
+    :param url: String: url where the xldeploy instance can be reached
+    :param username: String: username to use when contacting xldeploy
+    :param password: String: password to use when contaction the xldeploy instance
+    :return: xldeploy.client object
+    """
+    from xldeploy.role.connection import RoleConnection
+    return RoleConnection(url, username, password)
+
+def connect_security(url=None, username=None, password=None, **kwargs):
+    """
+    connect to the deployment service of xld
+    :param url: String: url where the xldeploy instance can be reached
+    :param username: String: username to use when contacting xldeploy
+    :param password: String: password to use when contaction the xldeploy instance
+    :return: xldeploy.client object
+    """
+    from xldeploy.security.connection import SecurityConnection
+    return SecurityConnection(url, username, password)
 # TODO make logging configurable from the config file
 
 

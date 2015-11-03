@@ -105,7 +105,7 @@ class XLDConnection(object):
         return self.execute_request(request)
 
     @log_with(logger)
-    def http_put(self, path, put_data):
+    def http_put(self, path, put_data = None):
         """
         do a put request carrying data to the xlds
         :param put_data: data to be put
