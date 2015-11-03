@@ -9,6 +9,7 @@ from xml.etree import ElementTree as ET
 
 from xldeploy.decorators import log_with, timer
 from xldeploy.client     import XLDConnection
+from xldeploy.security.role import PermissionSet
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,25 @@ class SecurityConnection(XLDConnection):
         :param role: str: role name
         :return: RoleObject
         '''
+        # check if the role exists
+        if not self.role_exists(role):
+            logger.error('unable to find role: %s' % role)
+        # retrieve the permissions xml
+        xml = self.http_get('security/granted-permissions/%s' % role)
+        set = PermissionSet(xml=xml)
 
+        return set
+
+
+        #
+
+
+#GET	/security/check/{permission}/{id:.*?}	Checks if the currently logged in user has a certain permission on a CI.
+#GET	/security/granted-permissions	Gets all the permissions granted to the logged in user.
+#GET	/security/granted-permissions/{role}	Gets all the permissions granted to a role.
+#GET	/security/permission/{permission}/{role}/{id:.*?}	Checks if a permission is granted to a role on a CI.
+#PUT	/security/permission/{permission}/{role}/{id:.*?}	Grants a permission to a role on a CI.
+#DELETE	/security/permission/{permission}/{role}/{id:.*?}	Revokes the permission of a role on a CI.
 #GET	/security/security/	Lists the names of all available securitys in the security system.
 #GET	/security/security/securitys	Lists the securitys of the currently logged in user.
 #GET	/security/security/securitys/{username}	Lists the securitys of a user.

@@ -1,4 +1,6 @@
 import logging
+from xml.etree import ElementTree as ET
+
 import xldeploy
 from xldeploy.decorators import log_with, timer
 from xldeploy.security import POSSIBLE_PERMISSIONS
@@ -62,8 +64,8 @@ class Permission(object):
         '''
 
         self.__id = None
-        self.__permissions = []
-        self.__type = []
+        self.__granted = []
+        self.__type = None
 
 
         try:
@@ -72,18 +74,83 @@ class Permission(object):
             self.__id = None
 
         try:
-            self.__permissions = kwargs['permission']
+            self.__granted = kwargs['grant']
         except KeyError:
-            self.__permissions = []
+            self.__granted = []
 
         try:
             self.__type = kwargs['type']
         except KeyError:
-            self.__type = []
+            self.__type = None
 
+        if self.__id is not None:
+            self.__type = self.get_type_from_id()
+
+    def __str__(self):
+        return "%s: %s" % (self.__id, str(self.__granted) )
 
     def get_type_from_id(self):
-        if not self.__id == 'Global':
+        if not self.__id == 'global':
             return self.__id.split('/')[0]
-        return 'Global'
+        return 'global'
+
+    def add_grant(self, grant):
+        if self.validate_grant(grant):
+            self.__granted.append(grant)
+        else:
+            logger.error("invalid grant: %s for permission type: %s" % (grant, self.__type))
+
+    def validate_grant(self, grant):
+        if grant in POSSIBLE_PERMISSIONS[self.__type]:
+            return True
+        else:
+            return False
+        
+    def get_id(self):
+        return self.__id
+
+class PermissionSet(object):
     
+    def __init__(self, **kwargs):
+        try:
+            self.__permissions = kwargs['permissions']
+        except KeyError:
+            self.__permissions = []
+
+
+
+        if kwargs['xml'] is not None:
+            self.parse_permission_xml(kwargs['xml'])
+        
+    def __str__(self):
+
+        l = []
+
+        for perm in self.__permissions:
+            l.append('%s\n' % (str(perm)))
+
+        s = ''.join(l)
+        return s
+
+    def add_permission(self, permission):
+        
+        self.__permissions.append(permission)
+        
+
+    def parse_permission_xml(self, xml):
+        # get the root element from the string object
+        xml_root = ET.fromstring(xml)
+
+        # loop over the xml looking for entries
+        for x in xml_root.iter('entry'):
+            #get the id
+            id =  x.find('string').text
+            # instantiate a net permission
+            permission = Permission(id = id)
+            set = x.find('set')
+            for i in set.iter('string'):
+
+                permission.add_grant(i.text)
+
+            self.add_permission(permission)
+
