@@ -206,7 +206,7 @@ class RepoConnection(XLDConnection):
         :param ci: xldeploy.configuration_item.Ci object
         :return: Boolean True or False depending on success
         """
-        ci_id = ci.get_id
+        ci_id = ci.get_id()
         ci_parent = path.dirname(ci_id)
 
         logger.debug("attempting to save ci: %s to the repository" % (ci_id))
@@ -234,6 +234,12 @@ class RepoConnection(XLDConnection):
                 except Exception:
                    logger.info('unable to create ci: %s' % (ci_id))
                    return False
+            else:
+                logger.info('trying to create ci parent %s as directory' % ci_parent)
+                parent_ci = Ci(id=ci_parent,type='core.Directory' )
+                self.save_ci(parent_ci)
+                self.create_ci(ci)
+                return True
 
     def save_cis(self,cis):
         """
@@ -242,6 +248,36 @@ class RepoConnection(XLDConnection):
         """
         for ci in cis:
             self.save_ci(ci)
+
+        return True
+
+    @log_with(logger)
+    def ci_parent_name(self, name):
+
+        """
+
+        :type name: ci object or string
+        """
+        ci_parent = None
+        #get the parent name depending on input . We're going to treat ci objects different than strings
+        if isinstance(name, Ci):
+        # get parent name
+            ci_parent = path.dirname(name.get_id())
+        elif isinstance(name, str):
+            ci_parent = path.dirname(name)
+
+        return ci_parent
+
+    @log_with(logger)
+    def parent_ci_exists(self, ci):
+        '''
+
+        :param ci: ci to check the parent of (could be ci object or straight string)
+        :return:
+        '''
+
+        #run the parent name through the ci_exists function and return the answer
+        return self.ci_exists(self.ci_parent_name(ci))
 
 
     @log_with(logger)
@@ -253,13 +289,13 @@ class RepoConnection(XLDConnection):
 
         """
         if isinstance(ci, str):
-            ci_id = ci
+           ci_id = ci
         if isinstance(ci, Ci):
-            ci_id = ci.get_id
+           ci_id = ci.get_id()
 
-
-        exist = ET.fromstring(self.http_get("repository/exists/%s" % (ci_id))).text()
-        if exist == "False":
+        response = ET.fromstring(self.http_get("repository/exists/%s" % (ci_id)))
+        if 'false' in response.text:
+            logger.info("ci: %s does not exist" % ci )
             return False
         else:
             return True
