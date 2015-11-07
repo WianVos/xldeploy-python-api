@@ -134,7 +134,8 @@ class XLDConnection(object):
         :param data: data in case where dealing with a put or post request
         :return: request object
         """
-        url = ("%s/deployit/%s" % (self.__url, path))
+        new_url = ("%s/deployit/%s" % (self.__url, path))
+        url = new_url.replace('#', '%23')
         if data is None:
             request = urllib2.Request(url)
         else:

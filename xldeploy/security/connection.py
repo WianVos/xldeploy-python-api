@@ -10,6 +10,7 @@ from xml.etree import ElementTree as ET
 from xldeploy.decorators import log_with, timer
 from xldeploy.client     import XLDConnection
 from xldeploy.security.role import PermissionSet
+from xldeploy.security import POSSIBLE_PERMISSIONS
 
 logger = logging.getLogger(__name__)
 
@@ -112,8 +113,152 @@ class SecurityConnection(XLDConnection):
 
         return set
 
+    @log_with(logger)
+    def role_permission_exists(self, role, permission, id='global'):
+        '''
+        checks whether a permission is set on an id for a certain role.
+        if id is not passed it will assume global permission scope is intended
+        :param role: str role name
+        :param permission: str permission name
+        :param id: str ci id ..
+        :return: True or False
+        '''
 
-        #
+        #check if the role exists
+        if not self.role_exists(role):
+            logger.warning("role: %s does not exist" % role)
+
+        #check if the permission is set
+
+        response = ET.fromstring(self.http_get("security/permission/%s/%s/%s" % (permission, role, id)))
+        if 'false' in response.text:
+            logger.info("permission: %s does not exist for role: %s on ci: %s " % (permission, role, id))
+            return False
+        else:
+            logger.debug("permission: %s does exist for role: %s on ci: %s " % (permission, role, id))
+            return True
+
+        return False
+
+    @log_with(logger)
+    def create_role_permission(self, role, permission, id= 'global'):
+        '''
+        creates a permission on an id for a certain role.
+        if id is not passed it will assume global permission scope is intended
+        :param role: str role name
+        :param permission: str permission name
+        :param id: str ci id ..
+        :return: True or False
+        '''
+
+
+        #check if the role exists
+        if not self.role_exists(role):
+            logger.error("role: %s does not exist" % role)
+            return False
+
+        #check if the permission is set or not
+        # if not proceed else respond true
+        if self.role_permission_exists(role, permission, id) == True:
+            logger.info("permission: %s for role: %s on id: %s already set"  % (permission, role, id) )
+            return True
+
+        #create the permission
+        try:
+            response = self.http_put("security/permission/%s/%s/%s" % (permission, role, id) )
+        except Exception:
+            logger.error("unable to create permission: %s for role: %s on ci: %s " % (permission, role, id))
+            return False
+
+        #make sure the permission exists
+        if self.role_permission_exists(role, permission, id) == True:
+            logger.info("permission: %s for role: %s on id: %s created"  % (permission, role, id) )
+            return True
+        else:
+            logger.warning("permission: %s for role: %s on id: %s not created"  % (permission, role, id) )
+            return False
+
+    @log_with(logger)
+    def delete_role_permission(self, role, permission, id=None):
+        '''
+        delete a permission on an id for a certain role.
+        if id is not passed it will assume global permission scope is intended
+        :param role: str role name
+        :param permission: str permission name
+        :param id: str ci id ..
+        :return: True or False
+        '''
+         #check if the role exists
+        if not self.role_exists(role):
+            logger.error("role: %s does not exist so the permission doesn't exist" % role)
+            return True
+
+        #check if the permission is set or not
+        # if it is proceed else respond true
+        if self.role_permission_exists(role, permission, id) == False:
+            logger.info("permission: %s for role: %s on id: %s is not set"  % (permission, role, id) )
+            return True
+
+        #delete the permission
+        try:
+            response = self.http_delete("security/permission/%s/%s/%s" % (permission, role, id) )
+        except Exception:
+            logger.error("unable to delete permission: %s for role: %s on ci: %s " % (permission, role, id))
+            return False
+
+        #make sure the permission is gone
+        if self.role_permission_exists(role, permission, id) == False:
+            logger.info("permission: %s for role: %s on id: %s deleted"  % (permission, role, id) )
+            return True
+        else:
+            logger.warning("permission: %s for role: %s on id: %s not deleted"  % (permission, role, id) )
+            return False
+
+    @log_with(logger)
+    def save_permission(self,role, permission, strict=True):
+        '''
+        save a permission, if strict is set to true all the permission for the role on the id will be removed first before implementing the ones specified
+        :param role: the role to save this permission for
+        :param permission: permission object
+        :param strict: enforce strict permissions
+        :return: True/False
+        '''
+
+        # if strict is yes .. clean up first
+        if strict:
+            #run cleanup
+            for grant in permission.possible_grants():
+                self.delete_role_permission(role, grant, permission.get_id())
+
+        # create the stuff we want
+        print str(permission)
+        for grant in permission:
+            print "------------------------------------"
+            print grant
+            response = self.create_role_permission(role, grant, permission.get_id())
+            if response == False:
+                logger.warning("unable to create permissions for id: %s" % permission.get_id())
+                return False
+
+        return True
+
+
+        # if all goes well return True
+    @log_with(logger)
+    def save_permission_set(self, role, permission_set):
+        '''
+        save en entire permission set
+        :param permission_set: permissionset object
+        :return: True or false
+        '''
+        for permission in permission_set:
+           if self.save_permission(role, permission) == False:
+            logger.warning("unable to create permissionset " % permission.get_id())
+            return False
+
+        return True
+
+
 
 
 #GET	/security/check/{permission}/{id:.*?}	Checks if the currently logged in user has a certain permission on a CI.

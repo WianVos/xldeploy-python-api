@@ -71,10 +71,10 @@ class Permission(object):
         try:
             self.__id = kwargs['id']
         except KeyError:
-            self.__id = None
+            self.__id = 'global'
 
         try:
-            self.__granted = kwargs['grant']
+            self.__granted = kwargs['granted']
         except KeyError:
             self.__granted = []
 
@@ -109,9 +109,25 @@ class Permission(object):
     def get_id(self):
         return self.__id
 
+    def __iter__(self): # Python 3: def __next__(self)
+        """
+        this method provides a generator to make the PermissionSet iterable
+        :return:
+        """
+        c = 0
+        i = len(self.__granted)
+
+        while c < i:
+          yield self.__granted[c]
+          c+=1
+
+    def possible_grants(self):
+        return POSSIBLE_PERMISSIONS[self.__type]
+
 class PermissionSet(object):
     
     def __init__(self, **kwargs):
+
         try:
             self.__permissions = kwargs['permissions']
         except KeyError:
@@ -119,9 +135,11 @@ class PermissionSet(object):
 
 
 
-        if kwargs['xml'] is not None:
+        try:
             self.parse_permission_xml(kwargs['xml'])
-        
+        except KeyError:
+            pass
+
     def __str__(self):
 
         l = []
@@ -154,3 +172,14 @@ class PermissionSet(object):
 
             self.add_permission(permission)
 
+    def __iter__(self): # Python 3: def __next__(self)
+        """
+        this method provides a generator to make the PermissionSet iterable
+        :return:
+        """
+        c = 0
+        i = len(self.__permissions)
+
+        while c < i:
+          yield self.__permissions[c]
+          c+=1
